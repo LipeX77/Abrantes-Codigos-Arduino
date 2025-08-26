@@ -60,3 +60,23 @@ int valor = soma / 10;
 Polarização e corrosão: sensores resistivos corroem se ficam energizados o tempo todo. Alimente o sensor pelo pino digital (ou transistor) e ligue apenas na hora de ler, ou use sensor capacitivo (mais estável).
 
 Escala invertida? Se o seu sensor der maior valor quando molhado, remova o 100 - e use apenas valor*100/1023.0.
+
+
+// 3) Umidade (sensor analógico)
+int valor = 0;
+float umidade = 0;
+
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+  valor = analogRead(A0);
+  umidade = 100.0 - (valor * 100.0 / 1023.0);
+
+  Serial.print("Umidade: ");
+  Serial.print(umidade, 1);
+  Serial.println(" %");
+
+  delay(500);
+}

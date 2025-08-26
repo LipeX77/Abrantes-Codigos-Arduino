@@ -1,0 +1,62 @@
+int valor = 0;      // leitura bruta do ADC (0..1023)
+float umidade = 0;  // umidade estimada em %
+
+void setup() {
+  Serial.begin(9600);
+  // pinMode(A0, INPUT); // opcional: entradas analógicas já são INPUT por padrão
+}
+
+void loop() {
+  valor = analogRead(A0);                         // lê o sensor no pino A0 (0..1023)
+  umidade = 100.0 - (valor * 100.0 / 1023.0);     // converte para 0..100% (invertido)
+
+  Serial.print("Umidade: ");
+  Serial.print(umidade, 1);                       // 1 casa decimal
+  Serial.println(" %");
+
+  delay(500);                                     // intervalo entre leituras
+}
+O que cada parte faz
+int valor: guarda a leitura bruta do conversor A/D (0 a 1023).
+
+float umidade: porcentagem estimada (0 a 100%).
+
+setup(): inicia o Serial a 9600 bps para você ver as leituras no Monitor Serial.
+
+loop():
+
+analogRead(A0) pega a tensão no sensor (mapeada para 0..1023).
+
+umidade = 100 - valor*100/1023: transforma a leitura em %.
+→ Se 0 (tensão baixa) vira 100%; se 1023 (tensão alta) vira 0%.
+Isso é útil para muitos sensores de solo em que quanto mais molhado, menor a leitura.
+
+Imprime “Umidade: X %”.
+
+Pequeno delay(500) para desacelerar o loop.
+
+Dicas e melhorias (opcional)
+Calibração (recomendada): meça o valor com o sensor seco e molhado (imerso) e use-os na fórmula:
+
+cpp
+Copiar
+Editar
+const int SECO = 800;     // ajuste medindo no ar/seco
+const int MOLHADO = 300;  // ajuste imerso/100% molhado
+
+int valor = analogRead(A0);
+float umidade = (float)(SECO - valor) * 100.0 / (SECO - MOLHADO);
+umidade = constrain(umidade, 0, 100);
+Isso deixa a % coerente com o seu sensor/solo.
+
+Suavização (menos ruído):
+
+cpp
+Copiar
+Editar
+long soma = 0;
+for (int i = 0; i < 10; i++) { soma += analogRead(A0); delay(5); }
+int valor = soma / 10;
+Polarização e corrosão: sensores resistivos corroem se ficam energizados o tempo todo. Alimente o sensor pelo pino digital (ou transistor) e ligue apenas na hora de ler, ou use sensor capacitivo (mais estável).
+
+Escala invertida? Se o seu sensor der maior valor quando molhado, remova o 100 - e use apenas valor*100/1023.0.

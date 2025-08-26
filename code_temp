@@ -111,3 +111,44 @@ sensors.setWaitForConversion(false); // leitura não bloqueante (avançado)
 Unidade em Fahrenheit: sensors.getTempF(sensor1) se preferir °F.
 
 Impressão do símbolo: use " °C" (com espaço) como mostrado; antes estava " oC".
+
+
+// 2) DS18B20 (OneWire + DallasTemperature)
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+int porta = 10;
+int tempo = 2000;
+
+OneWire oneWire(porta);
+DallasTemperature sensors(&oneWire);
+DeviceAddress sensor1;
+
+void setup() {
+  Serial.begin(9600);
+  sensors.begin();
+  Serial.println("Localizando sensor DS18B20 ...");
+  if (!sensors.getAddress(sensor1, 0)) {
+    Serial.println("Sensor nao encontrado!");
+  }
+  Serial.print("Endereco do sensor: ");
+  enderecoSensor(sensor1);
+  Serial.println();
+  Serial.println();
+}
+
+void enderecoSensor(DeviceAddress deviceAddress) {
+  for (int k = 0; k < 8; k++) {
+    if (deviceAddress[k] < 16) Serial.print("0");
+    Serial.print(deviceAddress[k], HEX);
+  }
+}
+
+void loop() {
+  sensors.requestTemperatures();
+  float temperatura = sensors.getTempC(sensor1);
+  Serial.print("Temperatura: ");
+  Serial.print(temperatura, 1);
+  Serial.println(" °C");
+  delay(tempo);
+}

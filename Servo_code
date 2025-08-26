@@ -1,0 +1,67 @@
+#include <Servo.h>
+
+Servo myServo;              // objeto do servo
+const int potPin = A0;      // pino do potenciômetro (entrada analógica)
+
+int potVal;                 // leitura bruta do potenciômetro (0..1023)
+int angle;                  // ângulo para o servo (0..179)
+
+void setup() {
+  myServo.attach(9);        // pino do sinal do servo
+  Serial.begin(9600);       // monitor serial para depuração
+}
+
+void loop() {
+  potVal = analogRead(potPin);               // lê o potenciômetro (0..1023)
+  Serial.print("potVal: ");
+  Serial.print(potVal);
+
+  angle = map(potVal, 0, 1023, 0, 179);      // mapeia para ângulo do servo
+  Serial.print(", angle: ");
+  Serial.println(angle);
+
+  myServo.write(angle);                       // move o servo para o ângulo
+  delay(15);                                  // pequeno atraso para suavizar o movimento
+}
+
+O que cada parte faz (rapidinho)
+
+Servo / potPin / variáveis: definem o controle do servo e onde o pot está ligado.
+
+setup(): anexa o servo ao pino 9 e inicia o Serial.
+
+loop(): lê o potenciômetro, mostra no Serial, converte para ângulo e posiciona o servo.
+
+
+> dica: se seu servo trepidar nas extremidades, teste map(..., 10, 170) para evitar limites mecânicos.
+
+
+
+
+---
+
+Versão sem comentários
+
+#include <Servo.h>
+
+Servo myServo;
+const int potPin = A0;
+
+int potVal;
+int angle;
+
+void setup() {
+  myServo.attach(9);
+  Serial.begin(9600);
+}
+
+void loop() {
+  potVal = analogRead(potPin);
+  Serial.print("potVal: ");
+  Serial.print(potVal);
+  angle = map(potVal, 0, 1023, 0, 179);
+  Serial.print(", angle: ");
+  Serial.println(angle);
+  myServo.write(angle);
+  delay(15);
+}

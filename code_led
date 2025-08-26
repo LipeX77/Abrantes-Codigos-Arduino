@@ -1,0 +1,111 @@
+// Definição dos pinos dos LEDs RGB
+const int greenLEDPin = 9;
+const int redLEDPin   = 11;
+const int blueLEDPin  = 10;
+
+// Definição dos pinos dos sensores (entrada analógica)
+const int redSensorPin   = A0;
+const int greenSensorPin = A1;
+const int blueSensorPin  = A2;
+
+// Variáveis para armazenar valores dos LEDs (0–255)
+int redValue   = 0;
+int greenValue = 0;
+int blueValue  = 0;
+
+// Variáveis para armazenar valores lidos dos sensores (0–1023)
+int redSensorValue   = 0;
+int greenSensorValue = 0;
+int blueSensorValue  = 0;
+
+void setup() {
+  // Inicializa comunicação serial (para depuração)
+  Serial.begin(9600);
+
+  // Define os pinos dos LEDs como saída
+  pinMode(greenLEDPin, OUTPUT);
+  pinMode(redLEDPin, OUTPUT);
+  pinMode(blueLEDPin, OUTPUT);
+}
+
+void loop() {
+  // Lê os sensores de cor (valores de 0–1023)
+  redSensorValue = analogRead(redSensorPin);
+  delay(5); // pequena pausa para estabilizar a leitura
+  
+  greenSensorValue = analogRead(greenSensorPin);
+  delay(5);
+  
+  blueSensorValue = analogRead(blueSensorPin);
+
+  // Mostra os valores brutos dos sensores no Serial Monitor
+  Serial.print("Raw Sensor Values \t Red: ");
+  Serial.print(redSensorValue);
+  Serial.print("\t Green: ");
+  Serial.print(greenSensorValue);
+  Serial.print("\t Blue: ");
+  Serial.println(blueSensorValue);
+
+  // Converte os valores (0–1023) para faixa de 0–255
+  redValue   = redSensorValue / 4;
+  greenValue = greenSensorValue / 4;
+  blueValue  = blueSensorValue / 4;
+
+  // Mostra os valores mapeados no Serial Monitor
+  Serial.print("Mapped Sensor Values \t Red: ");
+  Serial.print(redValue);
+  Serial.print("\t Green: ");
+  Serial.print(greenValue);
+  Serial.print("\t Blue: ");
+  Serial.println(blueValue);
+
+  // Envia os valores convertidos para os LEDs RGB
+  analogWrite(redLEDPin, redValue);
+  analogWrite(greenLEDPin, greenValue);
+  analogWrite(blueLEDPin, blueValue);
+}
+Explicação parte por parte
+🔹 Definições de pinos (const int ...)
+Aqui você define quais pinos do Arduino estão conectados aos LEDs RGB e aos sensores analógicos de cor (pinos A0, A1, A2).
+
+🔹 Variáveis de armazenamento (int ...)
+redSensorValue, greenSensorValue, blueSensorValue: armazenam os valores brutos lidos dos sensores (0–1023).
+
+redValue, greenValue, blueValue: armazenam os valores convertidos para a escala de brilho do LED (0–255).
+
+🔹 Função setup()
+Serial.begin(9600): habilita comunicação serial a 9600 bps (velocidade usada pelo monitor serial).
+
+pinMode(..., OUTPUT): define que os pinos dos LEDs serão de saída (mandar corrente).
+
+🔹 Função loop()
+Aqui acontece o ciclo infinito de leitura dos sensores e controle dos LEDs.
+
+Leitura dos sensores
+
+analogRead(...) lê valores de 0 a 1023 (tensão analógica de 0–5V).
+
+Pequenos delay(5) ajudam a estabilizar a leitura.
+
+Impressão dos valores brutos
+
+O Serial.print(...) mostra no monitor serial os valores capturados pelos sensores.
+
+Mapeamento dos valores
+
+Como o PWM do Arduino aceita valores de 0 a 255, divide-se por 4 (valor/4).
+
+Isso converte o intervalo de 1023 → 255.
+
+Impressão dos valores mapeados
+
+Novamente mostra no monitor os valores já ajustados.
+
+Controle dos LEDs
+
+analogWrite(...) envia o valor de brilho para cada cor do LED RGB.
+
+Dessa forma, a cor do LED vai depender diretamente dos valores lidos dos sensores.
+
+👉 Resumindo:
+O código lê três sensores de cor (vermelho, verde e azul) → imprime os valores no Serial Monitor → converte os valores para faixa do LED RGB → ajusta a cor do LED proporcionalmente.

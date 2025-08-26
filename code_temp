@@ -1,0 +1,113 @@
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+// --- Configuração de hardware ---
+int porta = 10;      // Pino do Arduino ligado ao fio de DADOS do DS18B20 (fio amarelo normalmente)
+int tempo = 2000;    // Intervalo de atualização da temperatura em ms
+
+// --- Objetos das bibliotecas ---
+OneWire oneWire(porta);            // Barramento OneWire no pino escolhido
+DallasTemperature sensors(&oneWire); // Wrapper para comandos de temperatura no barramento
+
+DeviceAddress sensor1;             // Endereço (8 bytes) do sensor no barramento
+
+void setup() {
+  Serial.begin(9600);
+
+  sensors.begin(); // Inicializa a biblioteca DallasTemperature
+
+  Serial.println("Localizando sensor DS18B20 ...");
+  if (!sensors.getAddress(sensor1, 0)) {
+    Serial.println("Sensor nao encontrado!");
+  }
+
+  Serial.print("Endereco do sensor: ");
+  enderecoSensor(sensor1);
+  Serial.println();
+  Serial.println();
+}
+
+// Função que imprime o endereço (ROM code) do sensor em HEX
+void enderecoSensor(DeviceAddress deviceAddress) {
+  for (int k = 0; k < 8; k++) {
+    if (deviceAddress[k] < 16) Serial.print("0"); // zero à esquerda para bytes < 0x10
+    Serial.print(deviceAddress[k], HEX);
+  }
+}
+
+void loop() {
+  sensors.requestTemperatures();                // Dispara conversão de temperatura
+  float temperatura = sensors.getTempC(sensor1); // Lê temperatura em °C do sensor1
+
+  Serial.print("Temperatura: ");
+  Serial.print(temperatura, 1);                 // 1 casa decimal
+  Serial.println(" °C");
+
+  delay(tempo);
+}
+O que cada parte faz
+#include <OneWire.h> e #include <DallasTemperature.h>
+Importam as bibliotecas necessárias:
+
+OneWire: comunicação no barramento 1-fio do DS18B20.
+
+DallasTemperature: facilita comandos de leitura de temperatura e resolução, usando o OneWire.
+
+Configuração de hardware
+int porta = 10; define o pino de dados do sensor (o DS18B20 tem VCC, GND e DQ/DATA).
+
+int tempo = 2000; é o intervalo entre leituras (2 s).
+
+Objetos das bibliotecas
+OneWire oneWire(porta); cria o barramento 1-Wire no pino 10.
+
+DallasTemperature sensors(&oneWire); usa o barramento para operações de temperatura.
+
+DeviceAddress sensor1; é um array de 8 bytes que guarda o endereço único do DS18B20.
+
+setup()
+Serial.begin(9600); inicia a porta serial para depuração.
+
+sensors.begin(); inicializa a comunicação com os dispositivos 1-Wire.
+
+sensors.getAddress(sensor1, 0) tenta obter o endereço do primeiro sensor encontrado no barramento (índice 0).
+
+Se falhar, imprime “Sensor nao encontrado!”.
+
+Em seguida, imprime no Serial o endereço ROM do sensor com enderecoSensor(sensor1) (útil para identificar sensores quando há mais de um no mesmo fio).
+
+enderecoSensor(DeviceAddress deviceAddress)
+Percorre os 8 bytes do endereço e imprime em hexadecimal, com zero à esquerda para manter 2 dígitos por byte.
+
+loop()
+sensors.requestTemperatures(); manda todos os sensores do barramento fazerem a conversão de temperatura.
+
+sensors.getTempC(sensor1); lê a temperatura, em °C, do sensor cujo endereço está em sensor1.
+
+Imprime a leitura com 1 casa decimal e o sufixo °C.
+
+delay(tempo); aguarda o intervalo definido (2 s) e repete.
+
+Dicas práticas e melhorias (opcional)
+Resistor pull-up: lembre do resistor de 4,7 kΩ entre DQ (dados) e VCC (3,3 V ou 5 V) — sem ele, a comunicação costuma falhar.
+
+Fiação: VCC → 3,3 V/5 V (conforme seu módulo), GND → GND, DQ → pino 10 (no seu código).
+
+Erros comuns de leitura:
+
+-127 °C indica erro/comunicação.
+
+85 °C pode indicar que o sensor não concluiu a conversão (valor padrão após power-up).
+
+Vários sensores no mesmo fio: você pode chamar sensors.getAddress(addr, index) com index = 0,1,2... para enumerar todos.
+
+Resolução e desempenho:
+
+cpp
+Copiar
+Editar
+sensors.setResolution(sensor1, 12); // 9–12 bits; 12 bits ~750 ms de conversão
+sensors.setWaitForConversion(false); // leitura não bloqueante (avançado)
+Unidade em Fahrenheit: sensors.getTempF(sensor1) se preferir °F.
+
+Impressão do símbolo: use " °C" (com espaço) como mostrado; antes estava " oC".
